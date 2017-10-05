@@ -1,7 +1,11 @@
 {
   "mail": {
-    "host": "smtp.gmail.com",
-    "user": "someusername",
-    "pass": "somepassword"
+    "settings": {
+      "host": "smtp.gmail.com",
+      "user": "someone@gmail.com",
+      "pass": "secrect",
+      "port": 587
+    },
+    "from": "\"John Smith \" <john@example.com>"
   }
 }

@@ -1,33 +1,36 @@
 'use strict';
 const nodemailer = require('nodemailer');
 const config = require('config');
+const templateFiller = require('./template-filler');
+const receivers = require('./var/receivers.json');
 
 
 let smtpConfig = {
-    host: config.get('mail.host'),
-    port: 587,
+    host: config.get('mail.settings.host'),
+    port: config.get('mail.settings.port'),
     secure: false, // upgrade later with STARTTLS
     auth: {
-        user: config.get('mail.user'),
-        pass: config.get('mail.pass')
+        user: config.get('mail.settings.user'),
+        pass: config.get('mail.settings.pass')
     }
 };
 
 let transporter = nodemailer.createTransport(smtpConfig);
 
-// setup email data with unicode symbols
 let mailOptions = {
-    from: '"Fred Foo 👻" <foo@blurdybloop.com>', // sender address
-    to: 'p.reshetin@gotorussia.com', // list of receivers
-    subject: '2222 Hey from Petya ✔', // Subject line
-    text: 'Hey?', // plain text body
-    html: '<b>Hey?</b>' // html body
+    from: config.get('mail.from'),
+    subject: templateFiller.subject,
 };
 
-// send mail with defined transport object
-transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-        return console.log(error);
-    }
-    console.log('Message sent: %s', info.messageId);
+receivers.forEach(receiver => {
+  mailOptions.to = receiver.email;
+  mailOptions.html = templateFiller.prepareHtml(receiver.name);
+  mailOptions.text = templateFiller.prepareText(receiver.name);
+
+  transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+          return console.log(error);
+      }
+      console.log('Message sent: %s', info.messageId);
+  });
 });
